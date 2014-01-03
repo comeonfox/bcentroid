@@ -3,9 +3,8 @@
     Generating matrix of random numbers.
 '''
 
-import sys
 import random
-import numpy
+
 
 class randMat(object):
     def __init__(self):
@@ -19,14 +18,11 @@ class randMat(object):
     def shape(self):
         return (self.x, self.y)
 
-    def gen(self, *args):
-        (self.x, self.y) = ([int(n) for n in args])
+    def gen(self, x, y):
+        self.x, self.y = int(x), int(y)
         ret = []
         for j in xrange(self.y):
-            row = []
-            for i in xrange(self.x):
-                row.append(random.randint(self.min, self.max))
-            ret.append(row)
+            ret.append([random.randint(self.min, self.max) for n in range(self.x)])
         self.matrix = ret
         self.empty = False
 
@@ -36,3 +32,17 @@ class randMat(object):
 
     def extract(self):
         return self.matrix
+
+
+class randSeqs(randMat):
+    def __init__(self):
+        super(randSeqs, self).__init__()
+        self.base = ('A', 'C', 'G', 'T')
+
+    def gen(self, *args):
+        (self.x, self.y) = ([int(n) for n in args])
+        ret = []
+        for j in xrange(self.y):
+            ret.append([random.choice(self.base) for n in range(self.x)])
+        self.matrix = ret
+        self.empty = False
