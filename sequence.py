@@ -44,19 +44,17 @@ class sequence(str):
         flag, index = (0, 0)
         for m, s in seq:
             if s == 1:
-                index += 1
-                mult *= theta[index][base[m]]
-                index %= l
+                mult *= theta[index + 1][base[m]]
+                index = (index + 1) % l
                 # bkgrd -> motif
-                if flag == 0:
-                    flag = 1
+                flag = 1 if not flag else flag
                 continue
             if s == 0:
                 mult *= theta[s][base[m]]
                 # motif -> bkgrd
-                if flag == 1:
-                    flag = 0
+                flag = 0 if flag else flag
                 continue
+        return mult
 
     def forwardsum(self, locs, l, theta, prior):
         pass
