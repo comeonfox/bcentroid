@@ -22,7 +22,7 @@ class sequence(str):
     def _ind(i, j):
         return 1 if i == j else 0
 
-    def likelihood(self, locs, l, theta, prior):
+    def likelihood(self, locs, l, theta, prior, **kwargs):
         """
             compute the likelihood of the sequence.
             Parameters:
@@ -30,14 +30,19 @@ class sequence(str):
                 - `l`: motif length
                 - `theta`: motif and background compositions. 2d-arr, (l+1)*4
                 - `prior`: prior distribution of locs
+                - `kwargs`: i, j for slicing the sequence.
             Return:
                 likelihood of the sequence.
         """
         assert len(theta(0)) == l + 1, "motif length and theta not match"
+        (i, j) = (int(kwargs.get('i')), int(kwargs.get('j'))) if kwargs \
+            else (None, None)
         mask = [0] * len(self)
         for loc in locs:
             mask[loc:loc + l] = [1] * l
-        seq = izip(self, mask)
+        seq = izip(self, mask) if (i, j) is (None, None) \
+            else izip(self[i:j], mask)
+
         base = dict(zip(self.base, [0, 1, 2, 3]))
         mult = 1.0
         # (m, s) = ('A', 0)
@@ -56,8 +61,22 @@ class sequence(str):
                 continue
         return mult
 
-    def forwardsum(self, locs, l, theta, prior):
-        pass
+    def forwardsum(self, locs, l, theta, prior, jj, ii=0):
+        # FIXME:prior should be properly designed to make this work.
+        tmp = [self.likelihood(locs, l, theta, prior, i=ii, j=jj)
+               for v in prior]
+        numerator = sum(tmp)
+        denominator = 1.0
+        for s in self[ii:jj]:
+            denominator *= theta[0][s]
+        return 1.0 * numerator / denominator
 
-    def backwardsum(self, locs, l, theta, prior):
-        pass
+    def backwardsum(self, locs, l, theta, prior, ii):
+        # FIXME:prior should be properly designed to make this work.
+        tmp = [self.likelihood(locs, l, theta, prior, i=ii, j=len(self))
+               for v in prior]
+        numerator = sum(tmp)
+        denominator = 1.0
+        for s in self[ii:]:
+            denominator *= theta[0][s]
+        return 1.0 * numerator / denominator
