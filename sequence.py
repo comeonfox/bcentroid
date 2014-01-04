@@ -61,22 +61,21 @@ class sequence(str):
                 continue
         return mult
 
-    def forwardsum(self, locs, l, theta, prior, jj, ii=0):
+    def fbsum(self, locs, l, theta, prior, ii, jj):
+        """
+        Description:
+            compute forward sum and backward sum.
+        Parameters:
+            ---
+            ii and jj are index to slide the sequence. when computing
+            forward sum, `ii=0` and `jj<len(sequence)`; when computing
+            backward sum, `ii<len(sequence)` and `jj=len(sequence)`.
+        """
         # FIXME:prior should be properly designed to make this work.
         tmp = [self.likelihood(locs, l, theta, prior, i=ii, j=jj)
                for v in prior]
         numerator = sum(tmp)
         denominator = 1.0
         for s in self[ii:jj]:
-            denominator *= theta[0][s]
-        return 1.0 * numerator / denominator
-
-    def backwardsum(self, locs, l, theta, prior, ii):
-        # FIXME:prior should be properly designed to make this work.
-        tmp = [self.likelihood(locs, l, theta, prior, i=ii, j=len(self))
-               for v in prior]
-        numerator = sum(tmp)
-        denominator = 1.0
-        for s in self[ii:]:
             denominator *= theta[0][s]
         return 1.0 * numerator / denominator
