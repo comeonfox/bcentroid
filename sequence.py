@@ -61,21 +61,51 @@ class sequence(str):
                 continue
         return mult
 
-    def fbsum(self, locs, l, theta, prior, ii, jj):
+    def fbsum(self, c, l, theta, prior, ii, jj):
         """
         Description:
             compute forward sum and backward sum.
         Parameters:
             ---
+            c: length of locs.
+            prior: prior distribution of Y. all possible values can be
+                   extracted easily from this distribution.
             ii and jj are index to slide the sequence. when computing
             forward sum, `ii=0` and `jj<len(sequence)`; when computing
             backward sum, `ii<len(sequence)` and `jj=len(sequence)`.
         """
+        assert c == len(locs)
+        # Init.
+        if c == 0:
+            return 1
+        for c in xrange(1,len(self)/l+1):
+            if jj < c*l:
+                return 0
         # FIXME:prior should be properly designed to make this work.
-        tmp = [self.likelihood(locs, l, theta, prior, i=ii, j=jj)
+        tmp = [self.likelihood(v, l, theta, prior, i=ii, j=jj)
                for v in prior]
         numerator = sum(tmp)
         denominator = 1.0
         for s in self[ii:jj]:
             denominator *= theta[0][s]
         return 1.0 * numerator / denominator
+
+    def fwdsum(self, c, j, theta, l):
+        base = dict(zip(self.base, xrange(0,4)))
+        def lamda(j, theta, l):
+            ret = 1.0
+            for pos in xrange(j, j+l):
+                try:
+                    ret *= float(theta[pos + 1 - j][base[self[pos]]]) / float(theta[0][base[self[pos]]])
+                except IndexError:
+                    print "%d %d %d" % (j, pos + 1 - j, base[self[pos]])
+                    raise
+            return ret
+
+
+        if c == 0:
+            return 1
+        if j < c * l:
+            return 0
+        return self.fwdsum(c, j-1, theta, l) + self.fwdsum(c-1,j-l,theta, l) * \
+                lamda(j-l+1, theta, l)
