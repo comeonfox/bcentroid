@@ -70,7 +70,8 @@ def main(**kwargs):
     rounds = int(kwargs.get('t', 1000))
     num = int(kwargs.get('n', 0))
     seqs = getSeqs(fn)
-    theta = getTheta(l)
+    p = kwargs.get('p', None)
+    theta = getTheta(l, p)
     for r in xrange(rounds):
         # get y
         y = []
